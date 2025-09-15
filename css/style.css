@@ -59,8 +59,10 @@ body {
     transform: translateY(-2px);
 }
 
-.btn:active {
+.btn:active,
+.btn.active {
     transform: translateY(0);
+    background: #555;
 }
 
 .btn.clear {
@@ -72,6 +74,12 @@ body {
     background: #ff5252;
 }
 
+.btn.clear:active,
+.btn.clear.active {
+    background: #e64545;
+    transform: translateY(0);
+}
+
 .btn.equals {
     background: #4ecdc4;
     grid-row: span 2;
@@ -79,6 +87,12 @@ body {
 
 .btn.equals:hover {
     background: #45b7aa;
+}
+
+.btn.equals:active,
+.btn.equals.active {
+    background: #3da399;
+    transform: translateY(0);
 }
 
 .btn.zero {
@@ -93,10 +107,28 @@ body {
     background: #ff8c00;
 }
 
+.btn.operator:active,
+.btn.operator.active {
+    background: #e6780a;
+    transform: translateY(0);
+}
+
 #delete {
     background: #ff6b6b;
 }
 
 #delete:hover {
     background: #ff5252;
+}
+
+#delete:active,
+#delete.active {
+    background: #e64545;
+    transform: translateY(0);
+}
+
+#decimal:active,
+#decimal.active {
+    background: #555;
+    transform: translateY(0);
 }

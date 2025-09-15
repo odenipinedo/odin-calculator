@@ -78,13 +78,12 @@ function appendDecimal() {
         shouldResetDisplay = false;
     }
 
-    // Only add decimal if there isn't one already
-    if (!displayValue.includes('.')) {
+    // Only add decimal if there isn't one already and display isn't at max length
+    if (!displayValue.includes('.') && displayValue.length < 12) {
         displayValue += '.';
         updateDisplay();
+        waitingForOperand = false;
     }
-
-    waitingForOperand = false;
 }
 
 // Function to handle operator clicks
@@ -164,14 +163,52 @@ function clear() {
     updateDisplay();
 }
 
-// Function to delete last digit
+// Function to delete last digit (backspace)
 function deleteLastDigit() {
+    if (shouldResetDisplay) {
+        return;
+    }
+
     if (displayValue.length > 1) {
         displayValue = displayValue.slice(0, -1);
     } else {
         displayValue = '0';
     }
     updateDisplay();
+}
+
+// Function to simulate button click with visual feedback
+function simulateButtonClick(buttonElement) {
+    if (buttonElement) {
+        buttonElement.classList.add('active');
+        setTimeout(() => {
+            buttonElement.classList.remove('active');
+        }, 150);
+    }
+}
+
+// Unified function to handle calculator actions
+function handleCalculatorAction(action, value = null) {
+    switch(action) {
+        case 'number':
+            appendNumber(value);
+            break;
+        case 'operator':
+            setOperator(value);
+            break;
+        case 'equals':
+            calculate();
+            break;
+        case 'decimal':
+            appendDecimal();
+            break;
+        case 'clear':
+            clear();
+            break;
+        case 'delete':
+            deleteLastDigit();
+            break;
+    }
 }
 
 // Add event listeners when DOM is loaded
@@ -184,7 +221,7 @@ document.addEventListener('DOMContentLoaded', function() {
     numberButtons.forEach(button => {
         button.addEventListener('click', () => {
             const number = button.getAttribute('data-number');
-            appendNumber(number);
+            handleCalculatorAction('number', number);
         });
     });
 
@@ -207,31 +244,72 @@ document.addEventListener('DOMContentLoaded', function() {
                     op = '/';
                     break;
             }
-            setOperator(op);
+            handleCalculatorAction('operator', op);
         });
     });
 
-    // Add event listener for equals button
-    document.getElementById('equals').addEventListener('click', calculate);
+    // Add event listeners for other buttons
+    document.getElementById('equals').addEventListener('click', () => handleCalculatorAction('equals'));
+    document.getElementById('clear').addEventListener('click', () => handleCalculatorAction('clear'));
+    document.getElementById('delete').addEventListener('click', () => handleCalculatorAction('delete'));
+    document.getElementById('decimal').addEventListener('click', () => handleCalculatorAction('decimal'));
 
-    // Add event listener for clear button
-    document.getElementById('clear').addEventListener('click', clear);
+    // Add keyboard support with visual feedback
+    document.addEventListener('keydown', function(event) {
+        // Prevent default behavior for calculator keys
+        if ('0123456789+-*/=.'.includes(event.key) || event.key === 'Enter' || event.key === 'Escape' || event.key === 'Backspace') {
+            event.preventDefault();
+        }
 
-    // Add event listener for delete button
-    document.getElementById('delete').addEventListener('click', deleteLastDigit);
+        let buttonToHighlight = null;
 
-    // Add event listener for decimal button
-    document.getElementById('decimal').addEventListener('click', appendDecimal);
+        // Handle number keys
+        if (event.key >= '0' && event.key <= '9') {
+            buttonToHighlight = document.querySelector(`[data-number="${event.key}"]`);
+            handleCalculatorAction('number', event.key);
+        }
 
-    // Test the functions in console
-    console.log("Testing calculator functions:");
-    console.log("add(5, 3) =", add(5, 3));
-    console.log("subtract(10, 4) =", subtract(10, 4));
-    console.log("multiply(6, 7) =", multiply(6, 7));
-    console.log("divide(15, 3) =", divide(15, 3));
-    console.log("divide(10, 0) =", divide(10, 0));
-    console.log("operate('+', 10, 5) =", operate('+', 10, 5));
-    console.log("operate('-', 20, 8) =", operate('-', 20, 8));
-    console.log("operate('*', 4, 9) =", operate('*', 4, 9));
-    console.log("operate('/', 100, 25) =", operate('/', 100, 25));
+        // Handle operator keys
+        switch(event.key) {
+            case '+':
+                buttonToHighlight = document.getElementById('add');
+                handleCalculatorAction('operator', '+');
+                break;
+            case '-':
+                buttonToHighlight = document.getElementById('subtract');
+                handleCalculatorAction('operator', '-');
+                break;
+            case '*':
+                buttonToHighlight = document.getElementById('multiply');
+                handleCalculatorAction('operator', '*');
+                break;
+            case '/':
+                buttonToHighlight = document.getElementById('divide');
+                handleCalculatorAction('operator', '/');
+                break;
+            case '=':
+            case 'Enter':
+                buttonToHighlight = document.getElementById('equals');
+                handleCalculatorAction('equals');
+                break;
+            case '.':
+                buttonToHighlight = document.getElementById('decimal');
+                handleCalculatorAction('decimal');
+                break;
+            case 'Backspace':
+                buttonToHighlight = document.getElementById('delete');
+                handleCalculatorAction('delete');
+                break;
+            case 'Escape':
+            case 'c':
+            case 'C':
+                buttonToHighlight = document.getElementById('clear');
+                handleCalculatorAction('clear');
+                break;
+        }
+
+        // Simulate button click visual feedback
+        simulateButtonClick(buttonToHighlight);
+    });
+
 });
